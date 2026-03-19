@@ -25,7 +25,7 @@ export default function AuthLayout({
 }: AuthLayoutProps) {
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-      <div className="w-[515px] h-[704px] bg-gradient-to-b from-slate-50 via-white to-slate-10 rounded-[32px] p-8 flex flex-col items-center pt-12 shadow-2xl max-w-full max-h-full border-6 border-white">
+      <div className="w-[515px] h-[704px] bg-white bg-gradient-to-b from-slate-50 via-white to-slate-10 rounded-[32px] p-8 flex flex-col items-center pt-12 shadow-2xl max-w-full max-h-full border-6 border-white">
         <div className="w-[399px] flex flex-col items-center">
           <div className="w-[62px] h-[52px] mb-4 mt-2 flex items-center justify-center">
             <img
