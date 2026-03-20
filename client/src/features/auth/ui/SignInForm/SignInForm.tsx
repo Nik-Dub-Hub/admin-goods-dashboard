@@ -1,8 +1,13 @@
 import { useEffect, useState } from "react";
 import type { ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAppDispatch } from "../../../../app/store/hooks";
+import {
+  loginStart,
+  loginSuccess,
+  loginFailure,
+} from "../../../../app/store/slices/authSlice";
 import UserApi from "../../../../entities/user/UserApi";
-import type { User } from "../../../../entities/user/types";
 import InputField from "../../../../shared/ui/InputField";
 import Button from "../../../../shared/ui/Button";
 import AuthLayout from "../../../../shared/ui/AuthLayout";
@@ -13,18 +18,16 @@ interface SignInInputs {
   password: string;
 }
 
-export default function SignInForm({
-  setUser,
-}: {
-  setUser: (user: User) => void;
-}) {
+export default function SignInForm() {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
   const [inputs, setInputs] = useState<SignInInputs>({
     username: "",
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -32,6 +35,7 @@ export default function SignInForm({
     const savedRememberMe = localStorage.getItem("rememberMe") === "true";
     setRememberMe(savedRememberMe);
   }, []);
+
   useEffect(() => {
     const autoLoginData = sessionStorage.getItem("autoLogin");
     if (autoLoginData) {
@@ -40,11 +44,12 @@ export default function SignInForm({
         setInputs({ username, password });
         sessionStorage.removeItem("autoLogin");
       } catch (e) {
-        void e;
+        void e
         console.log("Автологин данные некорректны");
       }
     }
   }, []);
+
   const handleClearAll = () => {
     setInputs({ username: "", password: "" });
   };
@@ -86,20 +91,22 @@ export default function SignInForm({
     setError("");
 
     try {
-      const user: User = await UserApi.signIn(inputs);
-      setUser(user);
+      dispatch(loginStart());
+      const user = await UserApi.signIn(inputs);
 
       if (rememberMe && user.accessToken) {
-          localStorage.setItem("accessToken", user.accessToken);
+        localStorage.setItem("accessToken", user.accessToken);
         sessionStorage.removeItem("accessToken");
-      } else if (user.accessToken) {   
+      } else if (user.accessToken) {
         localStorage.removeItem("accessToken");
         sessionStorage.setItem("accessToken", user.accessToken);
       }
 
+      dispatch(loginSuccess({ user, token: user.accessToken! }));
       navigate("/products");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login error:", error);
+      dispatch(loginFailure("Неверный логин или пароль"));
       setError("Неверный логин или пароль");
     } finally {
       setLoading(false);

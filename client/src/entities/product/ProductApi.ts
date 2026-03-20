@@ -1,14 +1,13 @@
 import type { ApiResponse, Product } from "./types";
 
 class ProductApi {
-  // 🔥 Универсальный метод с поддержкой сортировки, пагинации и поиска
   static async getProducts(
     limit = 30,
     skip = 0,
-    sortBy?: string, // 🔥 DummyJSON: sortBy
-    order: "asc" | "desc" = "asc", // 🔥 DummyJSON: order
+    sortBy?: string,
+    order: "asc" | "desc" = "asc",
     select?: string,
-    searchQuery?: string, // 🔥 DummyJSON: q
+    searchQuery?: string,
   ): Promise<ApiResponse<Product>> {
     const params = new URLSearchParams({
       limit: limit.toString(),
@@ -17,14 +16,13 @@ class ProductApi {
 
     if (select) params.append("select", select);
     if (sortBy) {
-      params.append("sortBy", sortBy); // ✅ DummyJSON
-      params.append("order", order); // ✅ DummyJSON
+      params.append("sortBy", sortBy);
+      params.append("order", order);
     }
     if (searchQuery) {
-      params.append("q", searchQuery); // ✅ Поиск
+      params.append("q", searchQuery);
     }
 
-    // 🔥 DummyJSON логика: search использует отдельный endpoint
     const url = searchQuery
       ? `https://dummyjson.com/products/search?${params}`
       : `https://dummyjson.com/products?${params}`;
@@ -33,7 +31,6 @@ class ProductApi {
     return response.json();
   }
 
-  // 🔥 Устаревшие методы (можно удалить позже)
   static async searchProducts(
     query: string,
     limit = 30,

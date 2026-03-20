@@ -74,7 +74,7 @@ export default function SignUpForm() {
     setError("");
 
     try {
-      const response = await UserApi.signUp(inputs); 
+      const response = await UserApi.signUp(inputs);
       setError(`${response.loginHint}`);
 
       setTimeout(() => {
