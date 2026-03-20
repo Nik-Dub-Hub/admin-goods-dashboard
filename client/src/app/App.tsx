@@ -1,31 +1,29 @@
-import "../app/App.css";
-import UserApi from "../entities/user/UserApi";
+import { useEffect } from "react";
 import Router from "./router/router";
-import { useState, useEffect } from "react";
-import type { User } from "../entities/user/types";
+import { useAppDispatch, useAppSelector } from "./store/hooks";
+import { loginSuccess } from "./store/slices/authSlice";
+import UserApi from "../entities/user/UserApi";
 
 function App() {
-  const [user, setUser] = useState<User | null>(null);
-  const [initializing, setInitializing] = useState(true);
+  const dispatch = useAppDispatch();
+  const { loading: authLoading } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     const initAuth = async () => {
-      console.log("App: initAuth start");
-
       try {
         const token =
           localStorage.getItem("accessToken") ||
           sessionStorage.getItem("accessToken");
 
         if (token) {
-          console.log("App: token found IMMEDIATE /products");
-
           try {
             const userData = await UserApi.getMe(token);
-            setUser(userData);
+            dispatch(loginSuccess({ user: userData, token }));
           } catch (error) {
             void error;
-            console.error("App: getMe failed, but token valid");
+            console.error("App: getMe failed, clearing token");
+            localStorage.removeItem("accessToken");
+            sessionStorage.removeItem("accessToken");
           }
         }
       } catch (error) {
@@ -33,15 +31,13 @@ function App() {
         console.error("App: fatal error");
         localStorage.removeItem("accessToken");
         sessionStorage.removeItem("accessToken");
-      } finally {
-        setInitializing(false);
       }
     };
 
     initAuth();
-  }, []);
+  }, [dispatch]);
 
-  if (initializing) {
+  if (authLoading) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
         Проверка...
@@ -49,11 +45,7 @@ function App() {
     );
   }
 
-  const token =
-    localStorage.getItem("accessToken") ||
-    sessionStorage.getItem("accessToken");
-
-  return <Router user={user} setUser={setUser} token={token} />;
+  return <Router />;
 }
 
 export default App;
